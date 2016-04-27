@@ -47,7 +47,7 @@ def gcd(a,b):
     else:
         return gcd(b,a%b)
 
-def primecoprime(a):1
+def primecoprime(a):
     n=randprime(19,1000)
     while (gcd(a,n)!=1): #implementing n%a!=1 only returned 3,5, or 13
         n=randprime(2,a)
