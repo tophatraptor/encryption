@@ -195,14 +195,13 @@ def invmixaCol(col):
     col[2] = galois(temp[2],14) ^ galois(temp[1],9) ^ galois(temp[0],13) ^ galois(temp[3],11)
     col[3] = galois(temp[3],14) ^ galois(temp[2],9) ^ galois(temp[1],13) ^ galois(temp[0],11)
 
-#all the convenience of working in a list proper is coming back to bite us
 #we need to generate a temporary col variable and have it iterate through
 def mixCol(state):
     for i in range(4):
         col = []
         for j in range(4):
             col.append(state[j*4+i])
-        mixaColumn(col)
+        mixaCol(col)
         for j in range(4):
             state[j*+i]=col[j]
 
@@ -211,7 +210,7 @@ def invmixCol(state):
         col=[]
         for j in range(4):
             col.append(state[j*4+i])
-        invmixaColumn(col)
+        invmixaCol(col)
         for j in range(4):
             state[j*4+i]=col[j]
 
@@ -242,7 +241,7 @@ def mainenc(state,ekey):
 
 def maindec(state,ekey):
     rkey = genRoundKey(ekey,14)
-    genrkey(state,rkey)
+    initRoundKey(state,rkey)
     invshift = invShiftRows(state)
     invSubByte(state)
     for i in range(13,0,-1):
