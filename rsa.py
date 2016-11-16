@@ -1,22 +1,25 @@
+#!usr/bin/python3
 import random
 import math
+import multiprocessing as mp
+import os
+import sys
+os.system("taskset -p 0xff %d" % os.getpid())
 
 #HELPER FUNCTIONS
 
 def isprime(x):
     if x >= 2:
         a = int(math.ceil(math.sqrt(x)))+1
-        for y in xrange(2,a): #xrange lazily evaluates
-        #xrange(1,a,2) makes isprime faster, but makes randprimes hang
+        for y in range(2,a):
             if not ( x % y ):
                 return False
-
     return True
 
 def genprimes(a,b):
     for i in range(a,b):
         if isprime(i):
-            print i
+            print (i)
 
 def randprime(a,b): #Don't pass in 'b' larger than 10**15 for sub-2-second performance times
     n = random.randint(a,b)
@@ -44,7 +47,7 @@ def gcd(a,b):
         return gcd(b,a%b)
 
 def primecoprime(a):
-    n=randprime(19,100)
+    n=randprime(19,1000)
     while (gcd(a,n)!=1): #implementing n%a!=1 only returned 3,5, or 13
         n=randprime(2,a)
     return n
@@ -59,7 +62,7 @@ def egcd(a,b):
     r=b
     oldr=a
     while r!=0:
-        quotient=oldr/r
+        quotient=oldr//r
         (oldr, r) = (r, oldr-quotient*r)
         (olds, s) = (s, olds-quotient*s)
         (oldt, t) = (t, oldt-quotient*t)
@@ -77,9 +80,14 @@ def modmultinv(a, m):
 def encrypt(message,e,m):
     return (message**e)%m
 
-#MAIN PROGRAM
+def decrypt(c,dp,dq,p,q,qinv):
+    m1=(c**dp)%p
+    m2=(c**dq)%q
+    h=(qinv*(m1-m2))%p
+    m=m2+h*q
+    return m
 
-linespace = "\n"
+#MAIN PROGRAM
 
 
 def genvalues():
@@ -91,55 +99,52 @@ def genvalues():
     t2=(q-1)
     e=primecoprime(totient)
     d=modmultinv(e,totient)
+
     return p,q,n,totient,t1,t2,e,d
 
 def RSA(message,p,q,n,totient,t1,t2,e,d):
-    print linespace
     mess = [ord(c) for c in message]
-    print "The message in ASCII form:"
-    print mess
-    print linespace
+    print ("The message in ASCII form:")
+    print (mess)
+    print ("\n")
     publickey=[n,e]
-    print "The current public key is: %s" % publickey
-    print linespace
+    print ("The current public key is: {}\n".format(publickey))
     privatekey=d
-    print "The current private key is: %s" % privatekey
-    print linespace
+    print ("The current private key is: {}\n".format(privatekey))
     enc = [encrypt(ord(c),e,n) for c in message]
     #at this point, enc should have a list of encrypted ASCII character values
-    print "The encrypted ASCII values: "
-    print enc
-    print linespace
+    print ("The encrypted ASCII values: ")
+    print (enc)
+    print ("\n")
     dp=d%t1
     dq=d%t2
     qinv=modmultinv(p,q)
     dec=[]
-    print "The decrypted ASCII tableset:"
-    for c in enc:
-        m1=(c**dp)%p
-        m2=(c**dq)%q
-        h=(qinv*(m1-m2))%p
-        m=m2+h*q
-        dec.append(m)
-    print dec
-    print linespace
-    print "The decrypted message: "
+    print ("The decrypted ASCII tableset:")
+    cpucount = mp.cpu_count()
+    pool = mp.Pool(processes=cpucount)
+    dec = [pool.apply(decrypt,args=(c,dp,dq,p,q,qinv,)) for c in enc]
+    print (dec)
+    print ("\n")
+    print ("The decrypted message: ")
     out=[chr(d) for d in dec]
-    print ''.join(out)
-    print linespace
+    print (''.join(out))
+    print ("\n")
 
 def main():
-    decide=input('Do you want a terminal RSA session (where you can do multiple entries with a single set of generated keys), or a single use session? (type t or s) ')
+    print ("To generate a new key, type 'newkey'. To exit, type 'q'\n")
+    inputmessage = input('What would you like to encrypt?: ')
     p,q,n,totient,t1,t2,e,d=genvalues()
-    if decide=="s":
-        print linespace
-        inputmessage=input('What message would you like to decrypt/encrypt with RSA? ')
+    RSA(inputmessage,p,q,n,totient,t1,t2,e,d)
+    while (True):
+        inputmessage = input('Next phrase to encrypt: ')
+        if (inputmessage=='newkey'):
+            p,q,n,totient,t1,t2,e,d=genvalues()
+            inputmessage = input('Next phrase to encrypt: ')
+        if (inputmessage=='q'):
+            break
         RSA(inputmessage,p,q,n,totient,t1,t2,e,d)
-    if decide=="t":
-        inputmessage=input('Phrase to encrypt:  (type \'q\' to exit)')
-        while inputmessage!="q":
-            RSA(inputmessage,p,q,n,totient,t1,t2,e,d)
-            inputmessage=input('Next input? ')
+
 
 if __name__ == '__main__':
     main()
