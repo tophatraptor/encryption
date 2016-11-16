@@ -1,7 +1,7 @@
-###RSA Encryption
+### Encryption
 
-rsav5.py is the final version (rsa-rsav4 are all previous versions)
+Repo where I'll continue to upload implementations of various encryption schema as I write them.
 
-This is a multicore implementation of the RSA encryption algorithm. It includes implementations of the Extended Euclidean Algorithm & calculation of bezout pairs, as well as calculation of modular multiplicative inverses.
+RSA is working in a repl loop.
 
-test.py is the file where I ran tests on individual functions.
+Individual functions of AES work, but I haven't added a main function to deal with conversion ofthe key into hex and back again.
