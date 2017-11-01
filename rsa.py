@@ -27,6 +27,30 @@ def randprime(a,b): #Don't pass in 'b' larger than 10**15 for sub-2-second perfo
         n=random.randint(a,b)
     return n
 
+def jacobi(a,b):
+    if (b % 2 == 0) or (b <= 0):
+        return 0
+    j = 1
+    if (a < 0):
+        a = -a
+        if (b % 4) == 3:
+            j = -j
+    while (a != 0)
+        while (a % 2)== 0:
+            a = a / 2
+            if ((b % 8) == 3) or ((b % 8) == 5):
+                j = -j
+        temp = b
+        b = a
+        a = temp
+        if ((a % 4) == 3) and ((b % 4) == 3):
+            j = -j
+        a = a % b
+    if (b == 1):
+        return j
+    else:
+        return 0
+
 def modexp(base,exp,mod): #implementing modular exponentiation w/ binary exponentiation
 #O(log(exp))
     if mod==1: return 0
